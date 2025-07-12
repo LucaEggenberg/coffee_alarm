@@ -71,7 +71,7 @@ def init_machine():
     GPIO.setup(gpio_pin, GPIO.OUT, initial=GPIO.LOW)
 
 def get_last_init() -> datetime:
-    if not os.path.exists(init_path)
+    if not os.path.exists(init_path):
         logging.warning(f"last initialization is not known, assuming none.")
         return to_date('1999-01-01 00:00:00')
     
