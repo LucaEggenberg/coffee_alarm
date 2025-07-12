@@ -38,7 +38,7 @@ def delete_files():
         os.remove(espresso_path)
 
 def make_file(path: str, time: datetime):
-    deleteFiles()
+    delete_files()
     f = open(path, 'x')
     f.write(time.strftime('%Y-%m-%d %H:%M:%S'))
     f.close()
