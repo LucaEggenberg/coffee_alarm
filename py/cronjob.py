@@ -31,7 +31,7 @@ def processFile(path: str, type_key: str):
     
     duration = config.get(type_key, 0)
     if duration == 0:
-        loggin.warning(f"duration for {type_key} does not exist, skipping")
+        logging.warning(f"duration for {type_key} does not exist, skipping")
         return
 
     if not os.path.exists(path):
@@ -43,23 +43,26 @@ def processFile(path: str, type_key: str):
         dateobj = to_date(dateStr)
 
         if dateobj < datetime.now():
-            logging.info(f'{path.split("/")[-1]} time')
-            os.remove(path)
+            logging.info(f'time for: {path.split("/")[-1]}')
             if not os.path.exists(init_path) or get_last_init() + timedelta(minutes=5) < datetime.now():
                 init_machine()
                 time.sleep(35)
             make_coffee(duration)
+            os.remove(path)
+            logging.info("finished, enjoy :)")
     except:
-        loggin.error(f"error processing {path}: {e}")
+        logging.error(f"error processing {path}")
 
 def make_coffee(duration: int):
+    logging.info(f"making coffee...")
     GPIO.setup(gpio_pin, GPIO.OUT, initial=GPIO.HIGH)
     time.sleep(duration)
     GPIO.setup(gpio_pin, GPIO.OUT, initial=GPIO.LOW)
 
 def init_machine():
+    logging.info('initialising machine')
     with open(init_path, 'w') as f:
-        f.write(to_date_string(datetime.now))
+        f.write(to_date_string(datetime.now()))
 
     GPIO.setup(gpio_pin, GPIO.OUT, initial=GPIO.LOW)
     time.sleep(1)
