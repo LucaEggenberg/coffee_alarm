@@ -44,7 +44,7 @@ def processFile(path: str, type_key: str):
 
         if dateobj < datetime.now():
             logging.info(f'time for: {path.split("/")[-1]}')
-            if not os.path.exists(init_path) or get_last_init() + timedelta(minutes=5) < datetime.now():
+            if get_last_init() + timedelta(minutes=5) < datetime.now():
                 init_machine()
                 time.sleep(35)
             make_coffee(duration)
@@ -71,10 +71,16 @@ def init_machine():
     GPIO.setup(gpio_pin, GPIO.OUT, initial=GPIO.LOW)
 
 def get_last_init() -> datetime:
-    f = open(init_path)
-    dateObj = to_date(f.read().strip('\n'))
-    f.close()
-    return dateObj
+    if not os.path.exists(init_path)
+        logging.warning(f"last initialization is not known, assuming none.")
+        return to_date('1999-01-01 00:00:00')
+    
+    try:
+        with open(init_path, 'r') as f:
+            return to_date(f.read().strip('\n'))
+
+    except Exception as e:
+        logging.error(f"an unexpected error occured, reading time of last init: {e}")
 
 def to_date(dateStr: str) -> datetime:
     return datetime.strptime(dateStr, '%Y-%m-%d %H:%M:%S')
