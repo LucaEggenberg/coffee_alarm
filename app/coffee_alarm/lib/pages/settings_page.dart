@@ -16,8 +16,6 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _apiIpController = TextEditingController();
   final TextEditingController _coffeeDurationController = TextEditingController();
   final TextEditingController _espressoDurationController = TextEditingController();
-  final TextEditingController _wifiSsidController = TextEditingController();
-  final TextEditingController _wifiPasswordController = TextEditingController();
 
   late Future<void> _prefsLoadFuture; // This new future for SharedPreferences only
   late Future<AppConfig?> _futureConfig;
@@ -36,8 +34,6 @@ class _SettingsPageState extends State<SettingsPage> {
 
   bool _isSavingApiIp = false;
   bool _isUpdatingDurations = false;
-  bool _isSettingWifi = false;
-  bool _isForgettingWifi = false;
 
   Future<void> _saveApiIp() async {
     setState(() { _isSavingApiIp = true; });
