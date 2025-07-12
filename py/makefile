@@ -66,5 +66,5 @@ setup_services:
 	sudo systemctl start $(API_SERVICE_NAME)
 	@echo "api service enabled and started"
 	
-	(sudo crontab -l 2>/dev/null; echo "* * * * * /usr/bin/python3 $(PROJECT_DIR)/$(CRONJOB_FILE) | sudo tee -a  $(WOKRING_DIR)/cron.log 2>&1") | sudo crontab -
+	(sudo crontab -l 2>/dev/null; echo "* * * * * /usr/bin/python3 $(PROJECT_DIR)/$(CRONJOB_FILE) | sudo tee -a  $(WOKRING_DIR)/cronJob.log 2>&1") | sudo crontab -
 	@echo "cronjob created"
