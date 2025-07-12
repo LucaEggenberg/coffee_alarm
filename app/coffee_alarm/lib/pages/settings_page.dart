@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../models/config.dart';
-import '../models/network_status.dart';
 import '../utils/constants.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -20,16 +19,14 @@ class _SettingsPageState extends State<SettingsPage> {
   final TextEditingController _wifiSsidController = TextEditingController();
   final TextEditingController _wifiPasswordController = TextEditingController();
 
-   late Future<void> _prefsLoadFuture; // This new future for SharedPreferences only
+  late Future<void> _prefsLoadFuture; // This new future for SharedPreferences only
   late Future<AppConfig?> _futureConfig;
-  late Future<NetworkStatus?> _futureNetworkStatus;
 
   @override
   void initState() {
     super.initState();
     _prefsLoadFuture = _loadApiIpFromPrefs(); 
-    _futureConfig = _apiService.fetchConfig(); 
-    _futureNetworkStatus = _apiService.fetchNetworkStatus();
+    _futureConfig = _apiService.fetchConfig();
   }
 
   Future<void> _loadApiIpFromPrefs() async {
@@ -68,44 +65,6 @@ class _SettingsPageState extends State<SettingsPage> {
       );
     }
     setState(() { _isUpdatingDurations = false; });
-  }
-
-  Future<void> _setWifiCredentials() async {
-    setState(() { _isSettingWifi = true; });
-    final success = await _apiService.putNetworkCredentials(
-      _wifiSsidController.text,
-      _wifiPasswordController.text,
-    );
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('wifi credentials set')),
-      );
-      _wifiPasswordController.clear();
-      setState(() { _futureNetworkStatus = _apiService.fetchNetworkStatus(); });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('failed to set wifi credentials')),
-      );
-    }
-    setState(() { _isSettingWifi = false; });
-  }
-
-  Future<void> _forgetWifiCredentials() async {
-    setState(() { _isForgettingWifi = true; });
-    final success = await _apiService.forgetNetworkCredentials();
-    if (success) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('wifi credentials forgotten')),
-      );
-      _wifiSsidController.clear();
-      _wifiPasswordController.clear();
-      setState(() { _futureNetworkStatus = _apiService.fetchNetworkStatus(); });
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('failed to forget wifi credentials')),
-      );
-    }
-    setState(() { _isForgettingWifi = false; });
   }
 
   @override
@@ -238,98 +197,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                     ),
                                   ],
                                 );
-                              }
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  // Network Settings (now uses _futureNetworkStatus directly)
-                  Card(
-                    elevation: 2,
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('network settings', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                          const SizedBox(height: 10),
-                          FutureBuilder<NetworkStatus?>(
-                            future: _futureNetworkStatus, // Now correctly points to the already started future
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Center(child: CircularProgressIndicator());
-                              } else if (snapshot.hasError) {
-                                return Text('error loading network status: ${snapshot.error}', style: const TextStyle(color: Colors.red));
-                              } else if (snapshot.hasData) {
-                                final NetworkStatus? status = snapshot.data;
-                                // If status loaded, ensure SSID controller reflects it
-                                if (status != null && status.configuredSsid != null && _wifiSsidController.text != status.configuredSsid!) {
-                                  _wifiSsidController.text = status.configuredSsid!;
-                                }
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text('current status: ${status?.message ?? "N/A"}', style: const TextStyle(fontStyle: FontStyle.italic)),
-                                    if (status?.configuredSsid != null && status!.configuredSsid!.isNotEmpty)
-                                      Text('configured wifi: ${status.configuredSsid}')
-                                    else
-                                      const Text('no wifi configured'),
-                                    Text('Hotspot Active: ${status?.isHotspotActive == true ? "Yes" : "No"}'),
-                                    if (status?.wlan0Ip != null)
-                                      Text('IP: ${status!.wlan0Ip}'),
-
-                                    const SizedBox(height: 20),
-                                    TextField(
-                                      controller: _wifiSsidController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'wifi SSID',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 10),
-                                    TextField(
-                                      controller: _wifiPasswordController,
-                                      decoration: const InputDecoration(
-                                        labelText: 'wifi password',
-                                        border: OutlineInputBorder(),
-                                      ),
-                                      obscureText: true,
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Row(
-                                      children: [
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: _isSettingWifi ? null : _setWifiCredentials,
-                                            child: _isSettingWifi
-                                                ? const SizedBox(
-                                                    width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                                                : const Text('set wifi'),
-                                          ),
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: ElevatedButton(
-                                            onPressed: _isForgettingWifi ? null : _forgetWifiCredentials,
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.orange,
-                                              foregroundColor: Colors.white,
-                                            ),
-                                            child: _isForgettingWifi
-                                                ? const SizedBox(
-                                                    width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)))
-                                                : const Text('forget wifi'),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                );
-                              } else {
-                                return const Text('no network status data');
                               }
                             },
                           ),

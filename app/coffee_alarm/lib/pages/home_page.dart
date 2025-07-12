@@ -61,7 +61,7 @@ class _HomePageState extends State<HomePage> {
     setState(() { _isSettingAlarm = true; });
     final success = await _apiService.setTimer(
       _selectedCoffeeType,
-      _formatTime(_selectedTime),
+      _selectedTime,
     );
     if (success) {
       await _refreshActiveAlarm();

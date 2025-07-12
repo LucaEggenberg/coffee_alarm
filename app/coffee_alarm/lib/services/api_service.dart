@@ -3,9 +3,9 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/timer.dart';
 import '../models/config.dart';
-import '../models/network_status.dart';
 import '../utils/constants.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class ApiService {
   static String? _baseUrl;
@@ -63,13 +63,16 @@ class ApiService {
     }
   }
 
-  Future<bool> setTimer(String coffeeType, String time) async {
+  Future<bool> setTimer(String coffeeType, TimeOfDay time) async {
     try {
-      final url = '${await getBaseUrl()}/timer/${coffeeType}';
-      final response = await _makeRequest(() => http.post(
-        Uri.parse(url),
+      final baseUrl = await getBaseUrl();
+      final url = Uri.parse('$baseUrl/timer/$coffeeType').replace(
+        queryParameters: { 'time': _formatTime(time) }
+      );
+
+      final response = await _makeRequest(() => http.put(
+        url,
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'time': time}),
       ));
       return response.statusCode == 200;
     } catch (e) {
@@ -120,44 +123,20 @@ class ApiService {
     }
   }
 
-  Future<NetworkStatus?> fetchNetworkStatus() async {
-    try {
-      final url = '${await getBaseUrl()}/network/status';
-      final response = await _makeRequest(() => http.get(Uri.parse(url)));
-      if (response.statusCode == 200) {
-        return NetworkStatus.fromJson(jsonDecode(response.body));
-      } else {
-        throw Exception('Failed to load network status: ${response.statusCode}');
-      }
-    } catch (e) {
-      print('Error fetching network status: $e');
-      return null;
-    }
-  }
+  String _formatTime(TimeOfDay time) {
+    final now = DateTime.now();
+    DateTime scheduledDateTime = DateTime(
+      now.year,
+      now.month,
+      now.day,
+      time.hour,
+      time.minute,
+    );
 
-  Future<bool> putNetworkCredentials(String ssid, String password) async {
-    try {
-      final url = '${await getBaseUrl()}/network/credentials';
-      final response = await _makeRequest(() => http.put(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'ssid': ssid, 'password': password}),
-      ));
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error setting network credentials: $e');
-      return false;
+    if (scheduledDateTime.isBefore(now)) {
+      scheduledDateTime = scheduledDateTime.add(const Duration(days: 1));
     }
-  }
-
-  Future<bool> forgetNetworkCredentials() async {
-    try {
-      final url = '${await getBaseUrl()}/network/forget_credentials';
-      final response = await _makeRequest(() => http.post(Uri.parse(url)));
-      return response.statusCode == 200;
-    } catch (e) {
-      print('Error forgetting network credentials: $e');
-      return false;
-    }
+    
+    return DateFormat('yyyy-MM-dd HH:mm:ss').format(scheduledDateTime);
   }
 }
