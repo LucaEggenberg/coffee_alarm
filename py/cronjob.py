@@ -50,8 +50,8 @@ def processFile(path: str, type_key: str):
             make_coffee(duration)
             os.remove(path)
             logging.info("finished, enjoy :)")
-    except:
-        logging.error(f"error processing {path}")
+    except Exception as e:
+        logging.error(f"error processing {path}; Exception: {e}")
 
 def make_coffee(duration: int):
     logging.info(f"making coffee...")
