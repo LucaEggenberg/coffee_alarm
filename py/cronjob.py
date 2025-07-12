@@ -78,9 +78,11 @@ def get_last_init() -> datetime:
     try:
         with open(init_path, 'r') as f:
             return to_date(f.read().strip('\n'))
-
+    except ValueError as e:
+        logging.error(f"error parsing time from {init_path}, assuming none.")
+        return to_date('1999-01-01 00:00:00')
     except Exception as e:
-        logging.error(f"an unexpected error occured, reading time of last init: {e}")
+        logging.error(f"an unexpected error occured reading last init time: {e}, assuming none")
 
 def to_date(dateStr: str) -> datetime:
     return datetime.strptime(dateStr, '%Y-%m-%d %H:%M:%S')
