@@ -8,7 +8,7 @@ An automated alarm, waking you up to the sweet sweet smell of coffee every morni
 
 ### Coffee maker
 
-> [!Assumption] 
+> [!CAUTION] 
 > This project assumes, that keeping the Coffee-button pressed let's you control the flow.
 
 I salvaged an old Nespresso machine and disassembled it. To harvest power for the raspberry pi I found, that Apples old chargers could easily be taken apart.
@@ -26,7 +26,7 @@ To achieve this, I utilized a 1-Channel 5V relay. This relay acts as an electron
 
 <img style="height:250px" src="images/front.jpeg">
 
-> [!Assumption] 
+> [!CAUTION] 
 > This project explicitly uses **GPIO 17** for control, and this pin is hardcoded in multiple parts of the projects software.
 > Pinouts: [pinout.xyz](https://pinout.xyz/)directly.
 
