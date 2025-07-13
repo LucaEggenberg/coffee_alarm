@@ -22,13 +22,12 @@ After connecting the charger's power wires to the coffee maker's internal power 
 ### Raspberry Pi
 Once the Raspberry Pi is powered, the next step is to connect it to the coffee makers control buttons.
 
-To achieve this, I utilized a 1-Channel 5V relay. This relay acts as an electronic switch, allowing the Raspberry Pi to simulate button presses.
+To achieve this, I utilized a 1-Channel 5V relay. This relay acts as an electronic switch, allowing the Raspberry Pi to simulate button presses. Pinouts: [pinout.xyz](https://pinout.xyz/)
 
 <img style="height:250px" src="images/front.jpeg">
 
 > [!CAUTION] 
 > This project explicitly uses **GPIO 17** for control, and this pin is hardcoded in multiple parts of the projects software.
-> Pinouts: [pinout.xyz](https://pinout.xyz/)directly.
 
 ### Mobile App
 The App was developed using Flutter and apart from setting the Alarm, it lets you control how many seconds the button is pressed for Coffee / Espresso. Also you can configure the IP-Address of the pi, I advise setting a static IP.
